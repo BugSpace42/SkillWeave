@@ -1,0 +1,100 @@
+<!-- templates/collaboration/session_detail.html -->
+{% extends 'base.html' %}
+{% block title %}Детали сессии{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">{{ session.title }}</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Описание:</strong></p>
+                <p>{{ session.description|linebreaks }}</p>
+                
+                <p><strong>Статус:</strong>
+                    {% if session.status == 'pending' %}
+                        <span class="badge bg-warning">Ожидает подтверждения</span>
+                    {% elif session.status == 'active' %}
+                        <span class="badge bg-info">Активна</span>
+                    {% elif session.status == 'completed' %}
+                        <span class="badge bg-success">Завершена</span>
+                    {% else %}
+                        <span class="badge bg-danger">Отменена</span>
+                    {% endif %}
+                </p>
+                
+                <p><strong>Инициатор:</strong> {{ session.initiator.email }}</p>
+                <p><strong>Партнер:</strong> {{ session.partner.email }}</p>
+                
+                {% if session.start_date %}
+                    <p><strong>Начало:</strong> {{ session.start_date|date:"d.m.Y H:i" }}</p>
+                {% endif %}
+                
+                {% if session.end_date %}
+                    <p><strong>Окончание:</strong> {{ session.end_date|date:"d.m.Y H:i" }}</p>
+                {% endif %}
+                
+                <div class="mt-3">
+                    {% if session.status == 'pending' and user == session.partner %}
+                        <form method="post" action="{% url 'collaboration:complete_session' session.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Принять сессию</button>
+                        </form>
+                    {% endif %}
+                    
+                    {% if session.status == 'active' and user in session.initiator,session.partner %}
+                        <form method="post" action="{% url 'collaboration:complete_session' session.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning">Завершить сессию</button>
+                        </form>
+                    {% endif %}
+                    
+                    {% if session.status == 'completed' and not user_review %}
+                        <a href="{% url 'collaboration:create_review' session.id %}" class="btn btn-info">Оставить отзыв</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if reviews %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Отзывы</h5>
+            </div>
+            <div class="card-body">
+                {% for review in reviews %}
+                <div class="mb-3 pb-3 border-bottom">
+                    <strong>{{ review.reviewer.email }}</strong>
+                    <div class="rating mb-2">
+                        {% for i in "12345" %}
+                            {% if i|add:0 <= review.rating %}
+                                <i class="bi bi-star-fill text-warning"></i>
+                            {% else %}
+                                <i class="bi bi-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p>{{ review.comment }}</p>
+                    <small class="text-muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Чат</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'chat:chat_room' session.chat_room.id %}" class="btn btn-primary w-100">
+                    <i class="bi bi-chat"></i> Открыть чат
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

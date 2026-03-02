@@ -1,0 +1,40 @@
+<!-- templates/hr_tools/send_invitation.html -->
+{% extends 'base.html' %}
+
+{% block title %}Отправить приглашение{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Отправить приглашение</h4>
+            </div>
+            <div class="card-body">
+                <h5>Кандидат: {{ candidate.get_full_name|default:candidate.username }}</h5>
+                <p class="text-muted">{{ candidate.email }}</p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="job_title" class="form-label">Должность</label>
+                        <input type="text" class="form-control" id="job_title" name="job_title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Сопроводительное сообщение</label>
+                        <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                        <div class="form-text">Опишите предложение, условия работы и почему кандидат подходит</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">Отправить приглашение</button>
+                        <a href="{% url 'hr_tools:candidate_search' %}" class="btn btn-outline-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

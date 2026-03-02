@@ -1,0 +1,98 @@
+<!-- templates/search/request_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ request.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">{{ request.title }}</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ request.description|linebreaks }}</p>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Требуемые Hard Skills:</h5>
+                        {% for skill in request.required_hard_skills.all %}
+                            <span class="badge bg-primary p-2 m-1">{{ skill.name }}</span>
+                        {% empty %}
+                            <p class="text-muted">Не указаны</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5>Требуемые Soft Skills:</h5>
+                        {% for skill in request.required_soft_skills.all %}
+                            <span class="badge bg-success p-2 m-1">{{ skill.name }}</span>
+                        {% empty %}
+                            <p class="text-muted">Не указаны</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-1">
+                            <strong>Автор:</strong>
+                            <a href="{% url 'profiles:detail' request.author.profile.pk %}">
+                                {{ request.author.get_full_name|default:request.author.username }}
+                            </a>
+                        </p>
+                        <p class="mb-1"><strong>Статус:</strong>
+                            {% if request.status == 'active' %}
+                                <span class="badge bg-success">Активный</span>
+                            {% elif request.status == 'in_progress' %}
+                                <span class="badge bg-warning">В процессе</span>
+                            {% elif request.status == 'completed' %}
+                                <span class="badge bg-info">Завершен</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Отменен</span>
+                            {% endif %}
+                        </p>
+                        <p class="mb-1"><strong>Создан:</strong> {{ request.created_at|date:"d.m.Y H:i" }}</p>
+                    </div>
+
+                    {% if user != request.author %}
+                        <a href="{% url 'chat:get_or_create_room' request.author.id %}" class="btn btn-primary">
+                            <i class="bi bi-chat"></i> Связаться
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Информация об авторе</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if request.author.profile.avatar %}
+                    <img src="{{ request.author.profile.avatar.url }}" class="rounded-circle img-fluid mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                        <i class="bi bi-person-fill text-white" style="font-size: 3rem;"></i>
+                    </div>
+                {% endif %}
+
+                <h5>{{ request.author.get_full_name|default:request.author.username }}</h5>
+                <p class="text-muted">{{ request.author.profile.specialization|default:"Специализация не указана" }}</p>
+
+                <span class="badge bg-warning mb-3">Рейтинг: {{ request.author.reputation|floatformat:0 }}</span>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'profiles:detail' request.author.profile.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-person"></i> Профиль
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

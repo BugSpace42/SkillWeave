@@ -1,0 +1,42 @@
+<!-- templates/collaboration/create_review.html -->
+{% extends 'base.html' %}
+{% block title %}Оставить отзыв{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Оставить отзыв</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">Оставьте отзыв для <strong>{{ reviewed.email }}</strong></p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">Оценка</label>
+                        <select class="form-select" id="rating" name="rating" required>
+                            <option value="">Выберите оценку</option>
+                            <option value="1">⭐ 1 - Плохо</option>
+                            <option value="2">⭐⭐ 2 - Удовлетворительно</option>
+                            <option value="3">⭐⭐⭐ 3 - Хорошо</option>
+                            <option value="4">⭐⭐⭐⭐ 4 - Очень хорошо</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5 - Отлично</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Комментарий</label>
+                        <textarea class="form-control" id="comment" name="comment" rows="5" placeholder="Поделитесь вашим мнением о сотрудничестве" required></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+                        <a href="{% url 'collaboration:session_detail' session.id %}" class="btn btn-outline-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

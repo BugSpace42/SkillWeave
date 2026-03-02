@@ -1,0 +1,30 @@
+<!-- templates/collaboration/complete_session.html -->
+{% extends 'base.html' %}
+{% block title %}Завершить сессию{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">Завершить сессию</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">Вы уверены, что хотите завершить сессию?</p>
+                
+                <div class="alert alert-info">
+                    <strong>{{ session.title }}</strong><br>
+                    Обе стороны получат +10 к рейтингу за завершение сессии.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning">Завершить сессию</button>
+                        <a href="{% url 'collaboration:session_detail' session.id %}" class="btn btn-outline-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

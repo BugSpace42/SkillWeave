@@ -1,0 +1,29 @@
+<!-- templates/profiles/onboarding.html -->
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Онбординг{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Добро пожаловать в SkillWeava!</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">Расскажите нам о себе, чтобы мы могли подобрать лучшие возможности для сотрудничества.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Продолжить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

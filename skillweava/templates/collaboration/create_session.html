@@ -1,0 +1,35 @@
+<!-- templates/collaboration/create_session.html -->
+{% extends 'base.html' %}
+{% block title %}Предложить сотрудничество{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Предложить сотрудничество</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">Предложите сотрудничество пользователю <strong>{{ partner.email }}</strong></p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название сессии</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Например: Обучение Python" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="description" name="description" rows="5" placeholder="Опишите, чему вы хотите научиться или чему можете научить" required></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Отправить предложение</button>
+                        <a href="{% url 'profiles:detail' partner.profile.id %}" class="btn btn-outline-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

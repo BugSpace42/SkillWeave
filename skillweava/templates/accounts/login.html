@@ -1,0 +1,30 @@
+<!-- templates/accounts/login.html -->
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Вход в SkillWeava</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Войти</button>
+                    </div>
+                </form>
+                <hr>
+                <p class="text-center mb-0">
+                    Нет аккаунта? <a href="{% url 'accounts:register' %}">Зарегистрируйтесь</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

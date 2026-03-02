@@ -1,0 +1,139 @@
+<!-- templates/chat/chat_room.html -->
+{% extends 'base.html' %}
+
+{% block title %}Чат{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Чат с {{ other_user.get_full_name|default:other_user.username }}</h5>
+                <div>
+                    <button class="btn btn-sm btn-light me-2" onclick="startCall('audio')">
+                        <i class="bi bi-telephone"></i> Аудиозвонок
+                    </button>
+                    <button class="btn btn-sm btn-light" onclick="startCall('video')">
+                        <i class="bi bi-camera-video"></i> Видеозвонок
+                    </button>
+                </div>
+            </div>
+            <div class="card-body" style="height: 500px; overflow-y: auto;" id="chat-messages">
+                {% for message in messages %}
+                <div class="mb-3 {% if message.sender == user %}text-end{% endif %}">
+                    <div class="d-inline-block">
+                        <div class="p-2 rounded {% if message.sender == user %}bg-primary text-white{% else %}bg-light{% endif %}">
+                            {{ message.content|linebreaksbr }}
+                        </div>
+                        <small class="text-muted">
+                            {{ message.timestamp|date:"d.m.Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="card-footer">
+                <form id="message-form" onsubmit="sendMessage(event)">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="message-input" placeholder="Введите сообщение..." required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-send"></i> Отправить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для звонка -->
+<div class="modal fade" id="callModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Звонок</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="call-container" style="height: 500px;">
+                <!-- Здесь будет Jitsi iframe -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const roomId = {{ room.id }};
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/' + roomId + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const messagesDiv = document.getElementById('chat-messages');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'mb-3 ' + (data.user_id === {{ user.id }} ? 'text-end' : '');
+        messageDiv.innerHTML = `
+            <div class="d-inline-block">
+                <div class="p-2 rounded ${data.user_id === {{ user.id }} ? 'bg-primary text-white' : 'bg-light'}">
+                    ${data.message.replace(/\n/g, '<br>')}
+                </div>
+                <small class="text-muted">
+                    ${new Date().toLocaleString('ru-RU')}
+                </small>
+            </div>
+        `;
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    function sendMessage(event) {
+        event.preventDefault();
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value;
+
+        if (message) {
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInput.value = '';
+        }
+    }
+
+    function startCall(type) {
+        fetch('{% url "chat:start_call" room.id %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'call_type=' + type
+        })
+        .then(response => response.json())
+        .then(data => {
+            const callContainer = document.getElementById('call-container');
+            callContainer.innerHTML = `
+                <iframe src="https://${data.jitsi_domain}/${data.jitsi_room}#config.startWithAudioMuted=false&config.startWithVideoMuted=false"
+                        allow="camera; microphone; fullscreen; display-capture"
+                        style="height: 100%; width: 100%; border: 0;">
+                </iframe>
+            `;
+
+            const callModal = new bootstrap.Modal(document.getElementById('callModal'));
+            callModal.show();
+        });
+    }
+
+    // Прокрутка вниз при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        const messagesDiv = document.getElementById('chat-messages');
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+</script>
+{% endblock %}

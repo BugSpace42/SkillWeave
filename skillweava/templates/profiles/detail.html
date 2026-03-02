@@ -1,0 +1,133 @@
+<!-- templates/profiles/detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}Профиль {{ profile.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                        <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
+                    </div>
+                {% endif %}
+                <h4>{{ profile.get_full_name }}</h4>
+                <p class="text-muted">{{ profile.specialization }}</p>
+
+                <div class="mb-3">
+                    <span class="badge bg-warning fs-6">Рейтинг: {{ profile.user.reputation|floatformat:0 }}</span>
+                </div>
+
+                {% if user != profile.user %}
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'chat:get_or_create_room' profile.user.id %}" class="btn btn-primary">
+                            <i class="bi bi-chat"></i> Написать сообщение
+                        </a>
+                        <a href="{% url 'collaboration:create_session' profile.user.id %}" class="btn btn-success">
+                            <i class="bi bi-people"></i> Предложить сотрудничество
+                        </a>
+                        {% if user.user_type == 'hr' %}
+                            <a href="{% url 'hr_tools:send_invitation' profile.user.id %}" class="btn btn-info">
+                                <i class="bi bi-briefcase"></i> Пригласить на работу
+                            </a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <a href="{% url 'profiles:edit' %}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Редактировать профиль
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="card-footer">
+                <small class="text-muted">На сайте с {{ profile.user.date_joined|date:"d.m.Y" }}</small>
+            </div>
+        </div>
+
+        {% if profile.resume %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Резюме</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ profile.resume.url }}" class="btn btn-outline-primary" download>
+                    <i class="bi bi-file-earmark-pdf"></i> Скачать резюме
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">О себе</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ profile.bio|linebreaks|default:"Пользователь еще не добавил информацию о себе" }}</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Hard Skills</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for skill in profile.hard_skills.all %}
+                            <span class="badge bg-primary p-2 m-1">{{ skill.name }}</span>
+                        {% empty %}
+                            <p class="text-muted">Hard skills не указаны</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Soft Skills</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for skill in profile.soft_skills.all %}
+                            <span class="badge bg-success p-2 m-1">{{ skill.name }}</span>
+                        {% empty %}
+                            <p class="text-muted">Soft skills не указаны</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Контактная информация</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% if profile.phone %}
+                        <li class="mb-2"><i class="bi bi-telephone"></i> {{ profile.phone }}</li>
+                    {% endif %}
+                    {% if profile.location %}
+                        <li class="mb-2"><i class="bi bi-geo-alt"></i> {{ profile.location }}</li>
+                    {% endif %}
+                    {% if profile.company %}
+                        <li class="mb-2"><i class="bi bi-building"></i> {{ profile.company }}, {{ profile.position }}</li>
+                    {% endif %}
+                    {% if profile.promo_video_url %}
+                        <li class="mb-2">
+                            <i class="bi bi-camera-video"></i>
+                            <a href="{{ profile.promo_video_url }}" target="_blank">Промо-ролик</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
